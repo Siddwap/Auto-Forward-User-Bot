@@ -29,8 +29,10 @@ async def get_all_target_channels():
 def is_admin(user_id):
     try:
         user_id = int(user_id)
+        print(f"[DEBUG] Checking admin for user_id: {user_id}, DEFAULT_ADMINS: {DEFAULT_ADMINS}")  # Debug log
         return user_id in DEFAULT_ADMINS
-    except:
+    except Exception as e:
+        print(f"[DEBUG] Invalid user_id: {user_id}, Error: {str(e)}")  # Debug log
         return False
 
 def add_admin(user_id):
@@ -46,6 +48,7 @@ def setup_extra_handlers(woodcraft):
     @woodcraft.on(events.NewMessage(pattern=r'^/setdelay (\d+)$'))
     async def set_delay(event):
         if not is_admin(event.sender_id):
+            print(f"[DEBUG] /setdelay denied for user_id: {event.sender_id}")  # Debug log
             return
         seconds = int(event.pattern_match.group(1))
         settings_col.update_one(
@@ -59,6 +62,7 @@ def setup_extra_handlers(woodcraft):
     @woodcraft.on(events.NewMessage(pattern=r'^/skip$'))
     async def skip_msg(event):
         if not is_admin(event.sender_id):
+            print(f"[DEBUG] /skip denied for user_id: {event.sender_id}")  # Debug log
             return
         settings_col.update_one(
             {"key": "skip_next"},
@@ -71,6 +75,7 @@ def setup_extra_handlers(woodcraft):
     @woodcraft.on(events.NewMessage(pattern=r'^/resume$'))
     async def resume(event):
         if not is_admin(event.sender_id):
+            print(f"[DEBUG] /resume denied for user_id: {event.sender_id}")  # Debug log
             return
         settings_col.update_one(
             {"key": "skip_next"},
@@ -83,6 +88,7 @@ def setup_extra_handlers(woodcraft):
     @woodcraft.on(events.NewMessage(pattern=r'^/woodcraft$'))
     async def woodcraft_handler(event):
         if not is_admin(event.sender_id):
+            print(f"[DEBUG] /woodcraft denied for user_id: {event.sender_id}")  # Debug log
             await event.reply("❌ Not allowed!")
             return
 
@@ -94,7 +100,7 @@ def setup_extra_handlers(woodcraft):
 /status `/status`  
 ```⚡ View bot status```
 
-/setdelay [Sec] `/setdelay`
+/ setdelay [Sec] `/setdelay`
 ```⏱️ Set the delay time.```
 
 /skip `/skip`  
@@ -149,24 +155,28 @@ def setup_extra_handlers(woodcraft):
     @woodcraft.on(events.NewMessage(pattern=r'^/addadmin$'))
     async def handle_add_admin(event):
         if not is_admin(event.sender_id):
+            print(f"[DEBUG] /addadmin denied for user_id: {event.sender_id}")  # Debug log
             return await event.reply("❌ You are not an admin.")
         await event.reply(f"❌ Cannot add admin: Admin ID is hardcoded to {DEFAULT_ADMINS[0]}")
 
     @woodcraft.on(events.NewMessage(pattern=r'^/removeadmin$'))
     async def handle_remove_admin(event):
         if not is_admin(event.sender_id):
+            print(f"[DEBUG] /removeadmin denied for user_id: {event.sender_id}")  # Debug log
             return await event.reply("❌ You are not an admin.")
         await event.reply(f"❌ Cannot remove admin: Admin ID is hardcoded to {DEFAULT_ADMINS[0]}")
 
     @woodcraft.on(events.NewMessage(pattern=r'^/listadmins$'))
     async def list_admins(event):
         if not is_admin(event.sender_id):
+            print(f"[DEBUG] /listadmins denied for user_id: {event.sender_id}")  # Debug log
             return await event.reply("❌ You are not an admin.")
         await event.reply(f"**👮 Admin List:**\n\n`{DEFAULT_ADMINS[0]}`", parse_mode='md')
 
     @woodcraft.on(events.NewMessage(pattern=r'^/restart$'))
     async def restart_bot(event):
         if not is_admin(event.sender_id):
+            print(f"[DEBUG] /restart denied for user_id: {event.sender_id}")  # Debug log
             return await event.reply("❌ You are not an admin.")
         await event.reply("♻️ Successfully restarting bot ✅")
         await asyncio.sleep(2)
@@ -175,6 +185,7 @@ def setup_extra_handlers(woodcraft):
     @woodcraft.on(events.NewMessage(pattern=r'^/noor$'))
     async def noor_handler(event):
         if not is_admin(event.sender_id):
+            print(f"[DEBUG] /noor denied for user_id: {event.sender_id}")  # Debug log
             await event.reply("❌ You are not an admin.")
             return
 
