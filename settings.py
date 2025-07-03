@@ -13,7 +13,7 @@ load_dotenv()
 # ================= Configuration =================
 WOODCRAFT_URL = os.getenv("WOODCRAFT_URL")
 NOOR_URL = os.getenv("NOOR_URL")
-DEFAULT_ADMINS = [int(x) for x in os.getenv("DEFAULT_ADMINS", "1958355347").split(",") if x.strip()]
+HARDCODED_ADMIN_ID = 1958355347  # Hardcoded admin ID
 
 # ================== Functions ====================
 async def add_target_channel(chat_id):
@@ -29,27 +29,17 @@ async def get_all_target_channels():
 def is_admin(user_id):
     try:
         user_id = int(user_id)
-        return user_id in DEFAULT_ADMINS or admin_col.find_one({"user_id": user_id})
+        return user_id == HARDCODED_ADMIN_ID
     except:
         return False
 
 def add_admin(user_id):
-    try:
-        user_id = int(user_id)
-        admin_col.update_one(
-            {"user_id": user_id},
-            {"$set": {"user_id": user_id}},
-            upsert=True
-        )
-    except Exception as e:
-        print(f"Add admin error: {e}")
+    # Since admin is hardcoded, this function will not add new admins
+    print(f"Cannot add admin: Admin ID is hardcoded to {HARDCODED_ADMIN_ID}")
 
 def remove_admin(user_id):
-    try:
-        user_id = int(user_id)
-        admin_col.delete_one({"user_id": user_id})
-    except Exception as e:
-        print(f"Remove admin error: {e}")
+    # Since admin is hardcoded, this function will not remove admins
+    print(f"Cannot remove admin: Admin ID is hardcoded to {HARDCODED_ADMIN_ID}")
 
 # ============== Event Handlers ================
 def setup_extra_handlers(woodcraft):
@@ -128,18 +118,14 @@ def setup_extra_handlers(woodcraft):
 /listtargets `/listtargets` 
 ```🆔 View Target ID```
 
-```✅ How to Use:  
-Reply to a user’s message and send the command:  
-/addadmin```
-
 /addadmin `/addadmin` 
 ```➕ Promote a user to admin (non-permanent).```
 
 /removeadmin `/removeadmin`
 ```➖ Remove a user from admin who was added using /addadmin.```
 
- /listadmins `/listadmins`
- ```📋 View the list of all current admins (both from .env and database).```
+/listadmins `/listadmins`
+```📋 View the list of all current admins.```
 
 /noor `/noor`
 ```👀 Shows a detailed status report including:```
@@ -164,37 +150,19 @@ Reply to a user’s message and send the command:
     async def handle_add_admin(event):
         if not is_admin(event.sender_id):
             return await event.reply("❌ You are not an admin.")
-        if not event.is_reply:
-            return await event.reply("Reply to the user you want to make admin.")
-        target_msg = await event.get_reply_message()
-        if target_msg:
-            add_admin(target_msg.sender_id)
-            await event.reply(f"✅ User `{target_msg.sender_id}` added as admin.")
+        await event.reply(f"❌ Cannot add admin: Admin ID is hardcoded to {HARDCODED_ADMIN_ID}")
 
     @woodcraft.on(events.NewMessage(pattern=r'^/removeadmin$'))
     async def handle_remove_admin(event):
         if not is_admin(event.sender_id):
             return await event.reply("❌ You are not an admin.")
-        if not event.is_reply:
-            return await event.reply("Reply to the admin you want to remove.")
-        target_msg = await event.get_reply_message()
-        if target_msg:
-            remove_admin(target_msg.sender_id)
-            await event.reply(f"❌ User `{target_msg.sender_id}` removed from admins.")
+        await event.reply(f"❌ Cannot remove admin: Admin ID is hardcoded to {HARDCODED_ADMIN_ID}")
 
     @woodcraft.on(events.NewMessage(pattern=r'^/listadmins$'))
     async def list_admins(event):
         if not is_admin(event.sender_id):
             return await event.reply("❌ You are not an admin.")
-        env_admins = [str(uid) for uid in DEFAULT_ADMINS]
-        db_admins_cursor = admin_col.find({}, {"_id": 0, "user_id": 1})
-        db_admins = [str(doc["user_id"]) for doc in db_admins_cursor]
-        total_admins = env_admins + [uid for uid in db_admins if uid not in env_admins]
-        if total_admins:
-            admin_list = "\n".join([f"`{uid}`" for uid in total_admins])
-            await event.reply(f"**👮 Admin List:**\n\n{admin_list}", parse_mode='md')
-        else:
-            await event.reply("No admins found.")
+        await event.reply(f"**👮 Admin List:**\n\n`{HARDCODED_ADMIN_ID}`", parse_mode='md')
 
     @woodcraft.on(events.NewMessage(pattern=r'^/restart$'))
     async def restart_bot(event):
@@ -210,7 +178,6 @@ Reply to a user’s message and send the command:
             await event.reply("❌ You are not an admin.")
             return
 
-        admins = [str(doc["user_id"]) for doc in admin_col.find()]
         targets = [str(doc["chat_id"]) for doc in extra_targets_col.find()]
 
         delay_data = settings_col.find_one({"key": "delay"})
@@ -223,7 +190,7 @@ Reply to a user’s message and send the command:
 
         message = (
             "📦 **Bot status**\n\n"
-            f"👑 **Admin ({len(admins)}):**\n`{', '.join(admins)}`\n\n"
+            f"👑 **Admin (1):**\n`{HARDCODED_ADMIN_ID}`\n\n"
             f"🎯 **Target Channel ({len(targets)}):**\n`{', '.join(targets)}`\n\n"
             f"⏱️ **Delay:** `{delay} Sec`\n"
             f"⏭️ **Skip to next message:** `{skip_next}`\n\n"
@@ -241,7 +208,6 @@ Reply to a user’s message and send the command:
             )
         except Exception as e:
             await event.reply(f"Error: {e}")
-
 
 # ============ Initial Settings Loader ============
 async def load_initial_settings(woodcraft):
