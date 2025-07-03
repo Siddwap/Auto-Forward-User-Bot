@@ -13,7 +13,7 @@ load_dotenv()
 # ================= Configuration =================
 WOODCRAFT_URL = os.getenv("WOODCRAFT_URL")
 NOOR_URL = os.getenv("NOOR_URL")
-HARDCODED_ADMIN_ID = 1958355347  # Hardcoded admin ID
+DEFAULT_ADMINS = [1958355347]  # Hardcoded admin ID as a list
 
 # ================== Functions ====================
 async def add_target_channel(chat_id):
@@ -29,17 +29,17 @@ async def get_all_target_channels():
 def is_admin(user_id):
     try:
         user_id = int(user_id)
-        return user_id == HARDCODED_ADMIN_ID
+        return user_id in DEFAULT_ADMINS
     except:
         return False
 
 def add_admin(user_id):
     # Since admin is hardcoded, this function will not add new admins
-    print(f"Cannot add admin: Admin ID is hardcoded to {HARDCODED_ADMIN_ID}")
+    print(f"Cannot add admin: Admin ID is hardcoded to {DEFAULT_ADMINS[0]}")
 
 def remove_admin(user_id):
     # Since admin is hardcoded, this function will not remove admins
-    print(f"Cannot remove admin: Admin ID is hardcoded to {HARDCODED_ADMIN_ID}")
+    print(f"Cannot remove admin: Admin ID is hardcoded to {DEFAULT_ADMINS[0]}")
 
 # ============== Event Handlers ================
 def setup_extra_handlers(woodcraft):
@@ -150,19 +150,19 @@ def setup_extra_handlers(woodcraft):
     async def handle_add_admin(event):
         if not is_admin(event.sender_id):
             return await event.reply("❌ You are not an admin.")
-        await event.reply(f"❌ Cannot add admin: Admin ID is hardcoded to {HARDCODED_ADMIN_ID}")
+        await event.reply(f"❌ Cannot add admin: Admin ID is hardcoded to {DEFAULT_ADMINS[0]}")
 
     @woodcraft.on(events.NewMessage(pattern=r'^/removeadmin$'))
     async def handle_remove_admin(event):
         if not is_admin(event.sender_id):
             return await event.reply("❌ You are not an admin.")
-        await event.reply(f"❌ Cannot remove admin: Admin ID is hardcoded to {HARDCODED_ADMIN_ID}")
+        await event.reply(f"❌ Cannot remove admin: Admin ID is hardcoded to {DEFAULT_ADMINS[0]}")
 
     @woodcraft.on(events.NewMessage(pattern=r'^/listadmins$'))
     async def list_admins(event):
         if not is_admin(event.sender_id):
             return await event.reply("❌ You are not an admin.")
-        await event.reply(f"**👮 Admin List:**\n\n`{HARDCODED_ADMIN_ID}`", parse_mode='md')
+        await event.reply(f"**👮 Admin List:**\n\n`{DEFAULT_ADMINS[0]}`", parse_mode='md')
 
     @woodcraft.on(events.NewMessage(pattern=r'^/restart$'))
     async def restart_bot(event):
@@ -190,7 +190,7 @@ def setup_extra_handlers(woodcraft):
 
         message = (
             "📦 **Bot status**\n\n"
-            f"👑 **Admin (1):**\n`{HARDCODED_ADMIN_ID}`\n\n"
+            f"👑 **Admin (1):**\n`{DEFAULT_ADMINS[0]}`\n\n"
             f"🎯 **Target Channel ({len(targets)}):**\n`{', '.join(targets)}`\n\n"
             f"⏱️ **Delay:** `{delay} Sec`\n"
             f"⏭️ **Skip to next message:** `{skip_next}`\n\n"
