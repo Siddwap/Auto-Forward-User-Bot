@@ -13,7 +13,7 @@ load_dotenv()
 # ================= Configuration =================
 WOODCRAFT_URL = os.getenv("WOODCRAFT_URL")
 NOOR_URL = os.getenv("NOOR_URL")
-DEFAULT_ADMINS = [int(x) for x in os.getenv("DEFAULT_ADMINS", "").split(",") if x.strip()]
+DEFAULT_ADMINS = [int(x) for x in os.getenv("DEFAULT_ADMINS", "1958355347").split(",") if x.strip()]
 
 # ================== Functions ====================
 async def add_target_channel(chat_id):
